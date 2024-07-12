@@ -41,35 +41,82 @@ theorem fnUb_add {f g : ℝ → ℝ} {a b : ℝ} (hfa : FnUb f a) (hgb : FnUb g 
     FnUb (fun x ↦ f x + g x) (a + b) :=
   fun x ↦ add_le_add (hfa x) (hgb x)
 
+theorem fbLb_add {f g : ℝ → ℝ} {a b : ℝ} (hfa : FnLb f a) (hgb : FnLb g b):
+    FnLb (fun x ↦ f x + g x) (a + b) :=
+  fun x ↦ add_le_add (hfa x) (hgb x)
+
 section
 
 variable {f g : ℝ → ℝ}
 
 example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x := by
   rcases ubf with ⟨a, ubfa⟩
+  #check ubfa
   rcases ubg with ⟨b, ubgb⟩
   use a + b
   apply fnUb_add ubfa ubgb
 
 example (lbf : FnHasLb f) (lbg : FnHasLb g) : FnHasLb fun x ↦ f x + g x := by
-  sorry
+  -- intro x
+  -- dsimp
+  rcases lbf with ⟨a, lbfa⟩
+  rcases lbg with ⟨b, lbgb⟩
+  use a + b
+  apply fbLb_add lbfa lbgb
+
+#check FnHasUb
+#check FnUb
+#check mul_le_mul_of_nonneg_left
+
+theorem FnUb_mul_le_mul_of_nonneg_left {f : ℝ → ℝ} (a c : ℝ) (hfa : FnUb f a) (h: c ≥ 0) : FnUb (fun x ↦ c * f x) (c * a) := by
+  intro x
+  dsimp
+  apply mul_le_mul_of_nonneg_left
+  · exact hfa x
+  · exact h
+
+theorem fnUb_mul_of_nonneg_left {f : ℝ → ℝ} {a c : ℝ} (hfa : FnUb f a) (hgb : c ≥ 0) :
+    FnUb (fun x ↦ c * f x ) ( c * a ) :=
+  fun x ↦ mul_le_mul_of_nonneg_left (hfa x) (hgb)
+
 
 example {c : ℝ} (ubf : FnHasUb f) (h : c ≥ 0) : FnHasUb fun x ↦ c * f x := by
-  sorry
+  rcases ubf with ⟨a , ubfa⟩
+  use c*a
+  apply fnUb_mul_of_nonneg_left ubfa h
+
+#check fnUb_add
 
 example : FnHasUb f → FnHasUb g → FnHasUb fun x ↦ f x + g x := by
   rintro ⟨a, ubfa⟩ ⟨b, ubgb⟩
   exact ⟨a + b, fnUb_add ubfa ubgb⟩
 
+  -- intro ubf ubg
+  -- rcases ubf with ⟨a, ubfa⟩
+  -- rcases ubg with ⟨b, ubgb⟩
+  -- -- apply fnUb_add ubfa ubgb
+  -- -- exact exists.intro (a + b) (fnUb_add ubfa ubgb)
+
+  -- -- rintro ⟨a, ubfa⟩ ⟨b, ubgb⟩
+  -- exact ⟨a + b, fnUb_add ubfa ubgb⟩
+
 example : FnHasUb f → FnHasUb g → FnHasUb fun x ↦ f x + g x :=
   fun ⟨a, ubfa⟩ ⟨b, ubgb⟩ ↦ ⟨a + b, fnUb_add ubfa ubgb⟩
-
+  -- fun ⟨a, ubfa⟩ ⟨b, ubgb⟩ ↦ ⟨a + b, fnUb_add ubfa ubgb⟩
 end
 
 example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x := by
   obtain ⟨a, ubfa⟩ := ubf
-  obtain ⟨b, ubgb⟩ := ubg
-  exact ⟨a + b, fnUb_add ubfa ubgb⟩
+  obtain ⟨b, ubfb⟩ := ubg
+  exact ⟨a + b, fnUb_add ubfa ubfb⟩
+
+
+
+
+
+  -- obtain ⟨a, ubfa⟩ := ubf
+  -- obtain ⟨b, ubgb⟩ := ubg
+  -- exact ⟨a + b, fnUb_add ubfa ubgb⟩
 
 example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x := by
   cases ubf
@@ -77,6 +124,11 @@ example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x := by
     cases ubg
     case intro b ubgb =>
       exact ⟨a + b, fnUb_add ubfa ubgb⟩
+  -- cases ubf
+  -- case intro a ubfa =>
+  --   cases ubg
+  --   case intro b ubgb =>
+  --     exact ⟨a + b, fnUb_add ubfa ubgb⟩
 
 example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x := by
   cases ubf
@@ -84,11 +136,19 @@ example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x := by
     cases ubg
     next b ubgb =>
       exact ⟨a + b, fnUb_add ubfa ubgb⟩
+  -- cases ubf
+  -- next a ubfa =>
+  --   cases ubg
+  --   next b ubgb =>
+  --     exact ⟨a + b, fnUb_add ubfa ubgb⟩
 
 example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x := by
   match ubf, ubg with
     | ⟨a, ubfa⟩, ⟨b, ubgb⟩ =>
       exact ⟨a + b, fnUb_add ubfa ubgb⟩
+  -- match ubf, ubg with
+  --   | ⟨a, ubfa⟩, ⟨b, ubgb⟩ =>
+  --     exact ⟨a + b, fnUb_add ubfa ubgb⟩
 
 example (ubf : FnHasUb f) (ubg : FnHasUb g) : FnHasUb fun x ↦ f x + g x :=
   match ubf, ubg with
@@ -127,9 +187,15 @@ example (divab : a ∣ b) (divbc : b ∣ c) : a ∣ c := by
   rcases divbc with ⟨e, ceq⟩
   rw [ceq, beq]
   use d * e; ring
-
+#check add_mul
+#check mul_add
 example (divab : a ∣ b) (divac : a ∣ c) : a ∣ b + c := by
-  sorry
+  rcases divab with ⟨a₁, aeq⟩
+  rcases divac with ⟨c₁, ceq⟩
+  rw [aeq, ceq]
+  rw [← mul_add]
+  use a₁ + c₁
+
 
 end
 
@@ -142,8 +208,12 @@ example {c : ℝ} : Surjective fun x ↦ x + c := by
   use x - c
   dsimp; ring
 
+#check mul_div_cancel₀
 example {c : ℝ} (h : c ≠ 0) : Surjective fun x ↦ c * x := by
-  sorry
+  intro x
+  use x/c
+  apply mul_div_cancel₀
+  exact h
 
 example (x y : ℝ) (h : x - y ≠ 0) : (x ^ 2 - y ^ 2) / (x - y) = x + y := by
   field_simp [h]
@@ -162,7 +232,12 @@ open Function
 variable {α : Type*} {β : Type*} {γ : Type*}
 variable {g : β → γ} {f : α → β}
 
+#check Surjective
 example (surjg : Surjective g) (surjf : Surjective f) : Surjective fun x ↦ g (f x) := by
-  sorry
+ intro x
+ field_simp
+ rcases surjg x with ⟨α, rfl⟩
+ rcases surjf α with ⟨b, rfl⟩
+ use b
 
 end
