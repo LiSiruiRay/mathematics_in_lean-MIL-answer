@@ -7,21 +7,32 @@ variable {α : Type*}
 variable (s t u : Set α)
 open Set
 
+-- TODO: did not fully understand this
 example (h : s ⊆ t) : s ∩ u ⊆ t ∩ u := by
   rw [subset_def, inter_def, inter_def]
   rw [subset_def] at h
   simp only [mem_setOf]
   rintro x ⟨xs, xu⟩
-  exact ⟨h _ xs, xu⟩
+  #check h _ xs
+  exact ⟨h x xs, xu⟩
+  -- rw [subset_def, inter_def, inter_def]
+  -- rw [subset_def] at h
+  -- #check mem_setOf -- TODO: the step did not understand
+  -- simp only [mem_setOf]
+  -- rintro x ⟨xs, xu⟩
+  -- exact ⟨h _ xs, xu⟩ -- TODO: why there is the `_`
 
 example (h : s ⊆ t) : s ∩ u ⊆ t ∩ u := by
-  simp only [subset_def, mem_inter_iff] at *
+  simp only [subset_def, mem_inter_iff] at * -- TODO: at *?
   rintro x ⟨xs, xu⟩
   exact ⟨h _ xs, xu⟩
 
+-- #check
 example (h : s ⊆ t) : s ∩ u ⊆ t ∩ u := by
   intro x xsu
-  exact ⟨h xsu.1, xsu.2⟩
+  #check xsu.1
+  #check xsu.2
+  exact ⟨h xsu.1, xsu.2⟩ -- TODO: did not understand
 
 example (h : s ⊆ t) : s ∩ u ⊆ t ∩ u :=
   fun x ⟨xs, xu⟩ ↦ ⟨h xs, xu⟩
@@ -235,4 +246,3 @@ example : ⋂₀ s = ⋂ t ∈ s, t := by
   rfl
 
 end
-
